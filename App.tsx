@@ -1,38 +1,61 @@
 import React, { useState, useCallback } from 'react';
+import * as tmImage from '@teachablemachine/image';
 import Header from './components/Header';
 import Background from './components/Background';
 import InputSection from './components/InputSection';
 import PredictionCard from './components/PredictionCard';
 import ConfidenceBar from './components/ConfidenceBar';
-import { PredictionResult } from './types';
-import { DEMO_PREDICTIONS } from './constants';
+import { PredictionResult, WasteCategory } from './types';
+
+// REPLACE THIS WITH YOUR FULL LINK
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/dppSNGojQ/"; 
 
 const App: React.FC = () => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
-  // Mock Analysis Function
-  // In Phase-3, this will be replaced by the actual Teachable Machine model inference
-  const handleImageAnalysis = useCallback((imageUrl: string) => {
+  // New function to clear the prediction data
+  const handleReset = useCallback(() => {
+    setCurrentImage(null);
+    setPrediction(null);
+    setIsAnalyzing(false);
+  }, []);
+
+  const handleImageAnalysis = useCallback(async (imageUrl: string) => {
     setCurrentImage(imageUrl);
     setIsAnalyzing(true);
     setPrediction(null);
 
-    // Simulate Network/Processing Latency for Effect (1.5 seconds)
-    setTimeout(() => {
-      // Pick a random prediction for demonstration purposes
-      const randomResult = DEMO_PREDICTIONS[Math.floor(Math.random() * DEMO_PREDICTIONS.length)];
+    try {
+      // 1. Load the model from your link
+      const model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
       
-      // Add slight randomness to confidence for realism
-      const variedConfidence = Math.min(99.9, Math.max(70, randomResult.confidence + (Math.random() * 5 - 2.5)));
+      // 2. Load image element
+      const img = new Image();
+      img.src = imageUrl;
+      await img.decode();
       
+      // 3. Predict
+      const predictions = await model.predict(img);
+      
+      // 4. Find highest probability
+      const topResult = predictions.reduce((prev, current) => 
+        (prev.probability > current.probability) ? prev : current
+      );
+
+      // 5. Update UI
       setPrediction({
-        ...randomResult,
-        confidence: variedConfidence
+        category: topResult.className as WasteCategory,
+        confidence: topResult.probability * 100
       });
+
+    } catch (error) {
+      console.error("AI Error:", error);
+      alert("Error loading model. Check your URL.");
+    } finally {
       setIsAnalyzing(false);
-    }, 1500);
+    }
   }, []);
 
   return (
@@ -47,6 +70,7 @@ const App: React.FC = () => {
           <div className="lg:col-span-5 h-full">
             <InputSection 
               onImageSelected={handleImageAnalysis} 
+              onReset={handleReset} 
               isAnalyzing={isAnalyzing} 
             />
           </div>
@@ -72,7 +96,7 @@ const App: React.FC = () => {
         <div className="mt-8 pt-6 border-t border-white/10 flex justify-between items-center text-[10px] text-slate-500 font-mono tracking-[0.2em] uppercase">
           <div>
             STATUS: <span className={isAnalyzing ? "text-yellow-400 animate-pulse font-bold" : "text-cyber-green font-bold text-glow"}>
-              {isAnalyzing ? "PROCESSING TENSORS..." : "READY FOR INFERENCE"}
+              {isAnalyzing ? "ANALYZING..." : "SYSTEM ONLINE"}
             </span>
           </div>
           <div>

@@ -1,8 +1,8 @@
 export enum WasteCategory {
-  CHEMICAL = 'Chemical Waste',
-  INFECTIOUS = 'Infectious Waste',
-  PLASTIC = 'Plastic/Recyclable Waste',
-  GENERAL = 'General Waste'
+  YELLOW = 'Yellow',
+  RED = 'Red',
+  BLUE = 'Blue',
+  WHITE = 'White'
 }
 
 export interface PredictionResult {
