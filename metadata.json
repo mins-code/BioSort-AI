@@ -1,0 +1,7 @@
+{
+  "name": "BioSort AI",
+  "description": "A futuristic, AI-ready biomedical waste classification interface designed for high-impact academic demonstration.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
