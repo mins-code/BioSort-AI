@@ -7,7 +7,7 @@ import PredictionCard from './components/PredictionCard';
 import ConfidenceBar from './components/ConfidenceBar';
 import { PredictionResult, WasteCategory } from './types';
 
-const MODEL_URL = "https://teachablemachine.withgoogle.com/models/dppSNGojQ/"; 
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/c_1zyVx93/"; 
 
 const App: React.FC = () => {
   const [currentImage, setCurrentImage] = useState<string | null>(null);
